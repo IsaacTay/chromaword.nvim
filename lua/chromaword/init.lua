@@ -5,7 +5,6 @@ local M = {}
 M.setup = config.setup
 
 function M.enable()
-  M.setup();
   require("chromaword.highlight").start()
 end
 

@@ -4,20 +4,21 @@ local utils = require("chromaword.utils")
 local M = {}
 M.enabled = true
 M.highlights = {}
+M.buffers = {}
 
 local NAMESPACE_ID = vim.api.nvim_create_namespace("chromaword")
 local HIGHLIGHT_NAME_PREFIX = "chromaword"
+local AUGROUP = vim.api.nvim_create_augroup("chromaword", {})
 
-function number_to_hex(num)
-  return string.format("%x", num)
-end
-
-function M.highlight()
-  local buf = vim.api.nvim_get_current_buf();
-  local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, true);
+function M.highlight(buf, start_line, end_line)
+  buf = buf or vim.api.nvim_get_current_buf();
+  start_line = start_line or 0;
+  end_line = end_line or -1;
+  local buf_lines = vim.api.nvim_buf_get_lines(buf, start_line, end_line, true);
+  vim.api.nvim_buf_clear_namespace(buf, NAMESPACE_ID, start_line, end_line);
 
   -- Create all possible highlight groups
-  for line_no, line in ipairs(buf_lines) do
+  for line_offset, line in ipairs(buf_lines) do
     regex = "[a-zA-Z]+";
     local start_idx, end_idx = string.find(line, regex);
     while start_idx and end_idx do
@@ -28,9 +29,30 @@ function M.highlight()
         sum = sum % #config.options.colors;
       end
       local highlight_name = HIGHLIGHT_NAME_PREFIX .. sum + 1;
-      vim.api.nvim_buf_add_highlight(buf, NAMESPACE_ID, highlight_name, line_no - 1, start_idx - 1, end_idx);
+      vim.api.nvim_buf_add_highlight(buf, NAMESPACE_ID, highlight_name, start_line + line_offset - 1, start_idx - 1, end_idx);
       start_idx, end_idx = string.find(line, regex, end_idx + 1);
     end
+  end
+end
+
+function M.attach(buf)
+  if buf == nil or buf == 0 then
+    buf = vim.api.nvim_get_current_buf();
+  end
+  if not M.buffers[buf] then
+    M.highlight(buf, 0, -1)
+    vim.api.nvim_buf_attach(buf, false, {
+      on_lines = function(_event, _buf, _tick, first, _last, last_new)
+        if M.enabled == false then
+          return true
+        end
+        M.highlight(buf, first, last_new);
+      end,
+      on_detach = function()
+        M.buffers[buf] = nil;
+      end
+    })
+    M.buffers[buf] = true;
   end
 end
 
@@ -47,7 +69,7 @@ function M.start()
       M.highlights[i] = highlight_name
     end
   end
-  M.highlight();
+  M.attach(0);
 end
 
 function M.stop()
