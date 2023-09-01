@@ -1,6 +1,5 @@
 local M = {}
 
-M.options = {}
 
 local defaults = {
   colors = {
@@ -9,8 +8,10 @@ local defaults = {
   hl_weight = 0.2
 }
 
+M.options = defaults
+
 function M.setup(opts)
-  M.options = vim.tbl_deep_extend("force", defaults, opts or {})
+  M.options = vim.tbl_deep_extend("force", M.options, opts or {})
 end
 
 return M
