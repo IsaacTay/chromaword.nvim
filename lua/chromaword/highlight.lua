@@ -1,4 +1,5 @@
 local config = require("chromaword.config")
+local utils = require("chromaword.utils")
 
 local M = {}
 M.enabled = true
@@ -14,8 +15,8 @@ end
 function M.highlight()
   local buf = vim.api.nvim_get_current_buf();
   local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, true);
-  -- Create all possible highlight groups
 
+  -- Create all possible highlight groups
   for line_no, line in ipairs(buf_lines) do
     regex = "[a-zA-Z]+";
     local start_idx, end_idx = string.find(line, regex);
@@ -33,20 +34,6 @@ function M.highlight()
   end
 end
 
-function num_to_color(num)
-  return { num % 256, (num / 256) % 256, num / 256 ^ 2 };
-end
-
-function interpolate_color(color1, color2, weight)
-  color1 = num_to_color(color1);
-  color2 = num_to_color(color2);
-  local color = {};
-  for i = 1, 3 do
-    color[i] = (1 - weight) * color1[i] + weight * color2[i];
-  end
-  return string.format("#%02x%02x%02x", color[1], color[2], color[3]);
-end
-
 function M.start()
   M.enabled = true;
   local bg_color = vim.api.nvim_get_color_by_name("bg")
@@ -54,7 +41,7 @@ function M.start()
     if not M.highlights[i] then
       local highlight_name = HIGHLIGHT_NAME_PREFIX .. i;
       local hl_bg = vim.api.nvim_get_color_by_name(config.options.colors[i]);
-      hl_bg = interpolate_color(bg_color, hl_bg, config.options.hl_weight);
+      hl_bg = utils.interpolate_color(bg_color, hl_bg, config.options.hl_weight);
       vim.api.nvim_set_hl(0, highlight_name,
         { bg = hl_bg }); -- string.format("%06x", (i ^ 10 + 244) % (2 ^ 24))
       M.highlights[i] = highlight_name
