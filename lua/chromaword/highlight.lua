@@ -2,7 +2,7 @@ local config = require("chromaword.config")
 local utils = require("chromaword.utils")
 
 local M = {}
-M.enabled = true
+M.enabled = false
 M.highlights = {}
 M.buffers = {}
 
@@ -39,8 +39,8 @@ function M.attach(buf)
   if buf == nil or buf == 0 then
     buf = vim.api.nvim_get_current_buf();
   end
+  M.highlight(buf, 0, -1)
   if not M.buffers[buf] then
-    M.highlight(buf, 0, -1)
     vim.api.nvim_buf_attach(buf, false, {
       on_lines = function(_event, _buf, _tick, first, _last, last_new)
         if M.enabled == false then
@@ -70,11 +70,18 @@ function M.start()
     end
   end
   M.attach(0);
+  vim.api.nvim_create_autocmd({"BufEnter", "BufNew", "BufWinEnter"}, {
+    group = AUGROUP,
+    callback = function()
+      M.attach(0);
+    end
+  })
 end
 
 function M.stop()
   M.enabled = false;
   vim.api.nvim_buf_clear_namespace(0, NAMESPACE_ID, 0, -1);
+  vim.api.nvim_clear_autocmds({ group = AUGROUP });
 end
 
 return M
