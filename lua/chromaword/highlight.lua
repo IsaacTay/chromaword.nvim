@@ -64,8 +64,13 @@ function M.start()
       local highlight_name = HIGHLIGHT_NAME_PREFIX .. i;
       local hl_bg = vim.api.nvim_get_color_by_name(config.options.colors[i]);
       hl_bg = utils.interpolate_color(bg_color, hl_bg, config.options.hl_weight);
-      vim.api.nvim_set_hl(0, highlight_name,
-        { bg = hl_bg }); -- string.format("%06x", (i ^ 10 + 244) % (2 ^ 24))
+      hl_args = config.options.hl_args
+      for i, k in ipairs({ "fg", "bg", "sp" }) do
+        if hl_args[k] then
+          hl_args[k] = hl_bg
+        end
+      end
+      vim.api.nvim_set_hl(0, highlight_name, hl_args);
       M.highlights[i] = highlight_name
     end
   end

@@ -5,7 +5,10 @@ local defaults = {
   colors = {
     "blue", "green", "red", "yellow", "purple", "cyan"
   },
-  hl_weight = 0.2
+  hl_weight = 0.2,
+  hl_args = {
+    bg = true,
+  }
 }
 
 M.options = defaults
