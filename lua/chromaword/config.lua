@@ -2,12 +2,15 @@ local M = {}
 
 
 local defaults = {
-  colors = {
-    "blue", "green", "red", "yellow", "purple", "cyan"
-  },
-  hl_weight = 0.2,
-  hl_args = {
-    bg = true,
+  highlight = {
+    colors = {
+      "blue", "green", "red", "yellow", "purple", "cyan"
+    },
+    
+    weight = 0.2,
+    opts = {
+      bg = true,
+    }
   }
 }
 

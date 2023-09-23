@@ -17,7 +17,6 @@ function M.highlight(buf, start_line, end_line)
   local buf_lines = vim.api.nvim_buf_get_lines(buf, start_line, end_line, true);
   vim.api.nvim_buf_clear_namespace(buf, NAMESPACE_ID, start_line, end_line);
 
-  -- Create all possible highlight groups
   for line_offset, line in ipairs(buf_lines) do
     regex = "[a-zA-Z]+";
     local start_idx, end_idx = string.find(line, regex);
@@ -26,7 +25,7 @@ function M.highlight(buf, start_line, end_line)
       local sum = 0;
       for idx = 1, #word do
         sum = sum + word:byte(idx) * (idx % 2 + 1);
-        sum = sum % #config.options.colors;
+        sum = sum % #config.options.highlight.colors;
       end
       local highlight_name = HIGHLIGHT_NAME_PREFIX .. sum + 1;
       vim.api.nvim_buf_add_highlight(buf, NAMESPACE_ID, highlight_name, start_line + line_offset - 1, start_idx - 1, end_idx);
@@ -59,18 +58,19 @@ end
 function M.start()
   M.enabled = true;
   local bg_color = vim.api.nvim_get_color_by_name("bg")
-  for i = 1, #config.options.colors do
+  -- Create all possible highlight groups
+  for i = 1, #config.options.highlight.colors do
     if not M.highlights[i] then
       local highlight_name = HIGHLIGHT_NAME_PREFIX .. i;
-      local hl_bg = vim.api.nvim_get_color_by_name(config.options.colors[i]);
-      hl_bg = utils.interpolate_color(bg_color, hl_bg, config.options.hl_weight);
-      hl_args = config.options.hl_args
+      local hl_bg = vim.api.nvim_get_color_by_name(config.options.highlight.colors[i]);
+      hl_bg = utils.interpolate_color(bg_color, hl_bg, config.options.highlight.weight);
+      hl_opts = config.options.highlight.opts
       for i, k in ipairs({ "fg", "bg", "sp" }) do
-        if hl_args[k] then
-          hl_args[k] = hl_bg
+        if hl_opts[k] then
+          hl_opts[k] = hl_bg
         end
       end
-      vim.api.nvim_set_hl(0, highlight_name, hl_args);
+      vim.api.nvim_set_hl(0, highlight_name, hl_opts);
       M.highlights[i] = highlight_name
     end
   end
