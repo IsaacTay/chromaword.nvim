@@ -17,6 +17,8 @@ function M.highlight(buf, start_line, end_line)
   local buf_lines = vim.api.nvim_buf_get_lines(buf, start_line, end_line, true);
   vim.api.nvim_buf_clear_namespace(buf, NAMESPACE_ID, start_line, end_line);
 
+  local hl_start = config.options.highlight.start
+  local hl_stop = config.options.highlight.stop
   for line_offset, line in ipairs(buf_lines) do
     regex = "[a-zA-Z]+";
     local start_idx, end_idx = string.find(line, regex);
@@ -28,7 +30,10 @@ function M.highlight(buf, start_line, end_line)
         sum = sum % #config.options.highlight.colors;
       end
       local highlight_name = HIGHLIGHT_NAME_PREFIX .. sum + 1;
-      vim.api.nvim_buf_add_highlight(buf, NAMESPACE_ID, highlight_name, start_line + line_offset - 1, start_idx - 1, end_idx);
+
+      local new_start_idx = math.floor((start_idx - 1) * (1 - hl_start) + (end_idx - 1) * hl_start);
+      local new_end_idx = math.ceil((start_idx) * (1 - hl_stop) + (end_idx) * hl_stop);
+      vim.api.nvim_buf_add_highlight(buf, NAMESPACE_ID, highlight_name, start_line + line_offset - 1, new_start_idx, new_end_idx);
       start_idx, end_idx = string.find(line, regex, end_idx + 1);
     end
   end

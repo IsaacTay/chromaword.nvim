@@ -6,7 +6,9 @@ local defaults = {
     colors = {
       "blue", "green", "red", "yellow", "purple", "cyan"
     },
-    
+    -- Percentage between first & last index
+    start = 0.0,
+    stop = 1.0,
     weight = 0.2,
     opts = {
       bg = true,
