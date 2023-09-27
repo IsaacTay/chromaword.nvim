@@ -94,4 +94,9 @@ function M.stop()
   vim.api.nvim_clear_autocmds({ group = AUGROUP });
 end
 
+function M.reload()
+  M.stop()
+  M.start()
+end
+
 return M
